@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">CampMusicPlayer</string>
+    <string name="add_music">Add Music</string>
+    <string name="groups">Groups</string>
+    <string name="musics">Musics</string>
+    <string name="title_activity_music_config">MusicConfigActivity</string>
+</resources>

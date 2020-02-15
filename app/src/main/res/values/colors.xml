@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="colorBackgroundDark">#AAAAAA</color>
+    <color name="colorBackgroundLight">#EEEEEE</color>
+    <color name="colorTouchHighlight">#CCCCCC</color>
+    <color name="colorForegroundDark">#333333</color>
+    <color name="colorFade">#7F000000</color>
+    <color name="dummy1">#00AAFF</color>
+    <color name="dummy2">#FFAA00</color>
+    <color name="dummy3">#AA00FF</color>
+    <color name="dummy4">#FF00AA</color>
+</resources>
