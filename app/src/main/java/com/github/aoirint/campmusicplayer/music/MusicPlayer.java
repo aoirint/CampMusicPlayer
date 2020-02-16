@@ -2,6 +2,7 @@ package com.github.aoirint.campmusicplayer.music;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.media.audiofx.Equalizer;
 import android.net.Uri;
 import android.os.PowerManager;
 
@@ -16,6 +17,7 @@ public class MusicPlayer {
     Context context;
     CampMusicPlayer app;
     MediaPlayer mediaPlayer;
+    Equalizer equalizer;
 
     QueuePlayer queue;
     Music music;
@@ -38,9 +40,13 @@ public class MusicPlayer {
 
     public void clearMediaPlayer() {
         if (mediaPlayer == null) return;
+        equalizer.release();
+        equalizer = null;
+
         mediaPlayer.stop();
         mediaPlayer.release();
         mediaPlayer = null;
+
         pausing = false;
     }
     public void initMediaPlayer() {
@@ -54,6 +60,14 @@ public class MusicPlayer {
                 clearMediaPlayer();
             }
         });
+
+        equalizer = new Equalizer(0, mediaPlayer.getAudioSessionId());
+        equalizer.setEnabled(true);
+        short numOfBands = equalizer.getNumberOfBands();
+        short minLevel = equalizer.getBandLevelRange()[0];
+        for (short i=0; i<numOfBands; i++) {
+            equalizer.setBandLevel(i, minLevel);
+        }
     }
 
     public void reset() {

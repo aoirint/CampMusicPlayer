@@ -5,15 +5,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.github.aoirint.campmusicplayer.db.MusicDatabase;
-import com.github.aoirint.campmusicplayer.db.data.Album;
 import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.db.data.MusicKey;
-import com.github.aoirint.campmusicplayer.db.data.group.Group;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MusicTable {
