@@ -11,13 +11,27 @@ import com.github.aoirint.campmusicplayer.activity.main.MainActivity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class HashUtil {
 
-    public static String calcUriHash(Context context, Uri uri) throws IOException {
+    public static String calcUriStringHash(Uri uri) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("md5"); // fast calc
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+
+        md.update(uri.toString().getBytes(StandardCharsets.UTF_8));
+
+        return new String(md.digest(), StandardCharsets.US_ASCII);
+    }
+
+    public static String calcFileHash(Context context, Uri uri) throws IOException {
         MessageDigest md;
         try {
             md = MessageDigest.getInstance("md5"); // fast calc
@@ -33,8 +47,7 @@ public class HashUtil {
         while (dis.read(buffer) != -1); // read to EOF
         dis.close();
 
-        String hash = new String(md.digest(), "ascii");
-        return hash;
+        return new String(md.digest(), StandardCharsets.US_ASCII);
     }
 
     @Deprecated

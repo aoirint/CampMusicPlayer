@@ -10,7 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.R;
-import com.github.aoirint.campmusicplayer.db.Music;
+import com.github.aoirint.campmusicplayer.db.data.Music;
 
 import java.io.IOException;
 
@@ -32,13 +32,13 @@ public class MusicArtworkEntryView extends ConstraintLayout {
 
         this.music = music;
 
-        String text = music.title + " - " + music.artist;
+        String text = music.title + " - " + music.album.artist.name;
         TextView textView = findViewById(R.id.musicTextView);
         textView.setText(text);
 
         Bitmap artwork = null;
         try {
-            artwork = app.artworkCacheManager.loadOrCreate(music);
+            artwork = app.artworkCacheManager.loadOrCreate(music.getUri());
         } catch (IOException e) {
             e.printStackTrace();
         }

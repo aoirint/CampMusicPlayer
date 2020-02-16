@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
+
+import com.github.aoirint.campmusicplayer.util.HashUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,40 +22,41 @@ public class ArtworkCacheManager {
         this.context = context;
     }
 
-    public File getArtworkCachePath(Music music) {
+    public File getArtworkCachePath(Uri musicUri) {
         File cacheDir = context.getCacheDir();
         File artworkCacheDir = new File(cacheDir, ARTWORK_DIR);
 
-        return new File(artworkCacheDir, new File(String.format("%d.jpg", music.id)).getName());
+        String hash = HashUtil.calcUriStringHash(musicUri);
+
+        return new File(artworkCacheDir, new File(String.format("%s.jpg", hash)).getName());
     }
 
-    public Bitmap loadOrCreate(Music music) throws IOException {
-        File path = getArtworkCachePath(music);
-        if (path.exists()) {
-            return loadArtworkCache(music);
+    public Bitmap loadOrCreate(Uri musicUri) throws IOException {
+        File file = getArtworkCachePath(musicUri);
+        if (file.exists()) {
+            return loadArtworkCache(file);
         }
 
-        return createArtworkCache(music);
+        return createArtworkCache(musicUri);
     }
 
-    public Bitmap loadArtworkCache(Music music) throws IOException {
-        File path = getArtworkCachePath(music);
+    public Bitmap loadArtworkCache(File file) throws IOException {
+        FileInputStream fis = new FileInputStream(file);
 
-        FileInputStream fis = new FileInputStream(path);
         Bitmap bitmap = BitmapFactory.decodeStream(fis);
         fis.close();
 
         return bitmap;
     }
 
-    public Bitmap createArtworkCache(Music music) throws IOException {
+    private Bitmap createArtworkCache(Uri musicUri) throws IOException {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(context, music.getUri());
+        mmr.setDataSource(context, musicUri);
 
         byte[] artworkBytes = mmr.getEmbeddedPicture();
 
         Bitmap artwork = BitmapFactory.decodeByteArray(artworkBytes, 0, artworkBytes.length);
-        File path = getArtworkCachePath(music);
+        File path = getArtworkCachePath(musicUri);
         path.getParentFile().mkdirs();
 
         FileOutputStream fos = new FileOutputStream(path);

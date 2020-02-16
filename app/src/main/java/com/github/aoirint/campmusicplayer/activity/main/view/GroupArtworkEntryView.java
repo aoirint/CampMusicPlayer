@@ -11,13 +11,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.R;
-import com.github.aoirint.campmusicplayer.db.Group;
-import com.github.aoirint.campmusicplayer.db.Music;
+import com.github.aoirint.campmusicplayer.db.data.group.Group;
+import com.github.aoirint.campmusicplayer.db.data.Music;
 
 import java.io.IOException;
 
 public class GroupArtworkEntryView extends ConstraintLayout {
-
     Group group;
 
     public GroupArtworkEntryView(Context context) {
@@ -30,24 +29,19 @@ public class GroupArtworkEntryView extends ConstraintLayout {
     }
 
     public void setGroup(Group group) {
+        Context context = getContext();
         CampMusicPlayer app = (CampMusicPlayer) getContext().getApplicationContext();
 
         this.group = group;
 
-        String text = group.name;
+        String text = group.getName(context);
         TextView textView = findViewById(R.id.musicTextView);
         textView.setText(text);
 
         Bitmap artwork = null;
         try {
             // TODO: artwork handling
-            if (group.artworkPath == null) {
-                Music first = group.musics[0]; // > 0
-                artwork = app.artworkCacheManager.loadOrCreate(first);
-            }
-            else {
-                artwork = BitmapFactory.decodeFile(group.artworkPath);
-            }
+            artwork = group.getArtwork(context);
         } catch (IOException e) {
             e.printStackTrace();
         }

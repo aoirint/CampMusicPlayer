@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.github.aoirint.campmusicplayer.activity.tag.view.TriStateCheckbox;
-import com.github.aoirint.campmusicplayer.db.Music;
+import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -25,7 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.github.aoirint.campmusicplayer.R;
-import com.github.aoirint.campmusicplayer.db.Tag;
+import com.github.aoirint.campmusicplayer.db.data.Tag;
 import com.github.aoirint.campmusicplayer.util.TriCheckState;
 
 import java.util.ArrayList;
@@ -33,8 +31,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.github.aoirint.campmusicplayer.activity.main.MainActivity.logger;
 
 public class TagActivity extends AppCompatActivity {
     Context context;

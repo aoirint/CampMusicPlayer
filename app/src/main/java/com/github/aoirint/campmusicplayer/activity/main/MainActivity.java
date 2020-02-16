@@ -19,9 +19,12 @@ import com.github.aoirint.campmusicplayer.R;
 import com.github.aoirint.campmusicplayer.activity.main.view.GroupArtworkEntryView;
 import com.github.aoirint.campmusicplayer.activity.main.view.MusicArtworkEntryView;
 import com.github.aoirint.campmusicplayer.activity.tag.TagActivity;
-import com.github.aoirint.campmusicplayer.db.Group;
-import com.github.aoirint.campmusicplayer.db.Music;
-import com.github.aoirint.campmusicplayer.db.Tag;
+import com.github.aoirint.campmusicplayer.db.data.Album;
+import com.github.aoirint.campmusicplayer.db.data.group.GeneratedAlbumGroup;
+import com.github.aoirint.campmusicplayer.db.data.group.GeneratedTagGroup;
+import com.github.aoirint.campmusicplayer.db.data.group.Group;
+import com.github.aoirint.campmusicplayer.db.data.Music;
+import com.github.aoirint.campmusicplayer.db.data.Tag;
 import com.github.aoirint.campmusicplayer.util.TriCheckState;
 import com.github.aoirint.campmusicplayer.util.UnitUtil;
 
@@ -52,10 +55,9 @@ public class MainActivity extends AppCompatActivity {
         updateList();
     }
 
-    private void updateMusicsRecentlyAdded() {
+    // TODO: create class
+    private LinearLayout.LayoutParams initContainer(LinearLayout view) {
         Context context = getApplicationContext();
-
-        LinearLayout view = findViewById(R.id.musicContainer);
         view.removeAllViews();
 
         int size = 200; // dp
@@ -67,6 +69,15 @@ public class MainActivity extends AppCompatActivity {
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePx-marginPx*2, sizePx-marginPx*2);
         params.setMargins(0, 0, marginPx, 0);
+
+        return params;
+    }
+
+    private void updateMusicsRecentlyAdded() {
+        Context context = getApplicationContext();
+
+        LinearLayout view = findViewById(R.id.musicContainer);
+        LinearLayout.LayoutParams params = initContainer(view);
 
         Music[] musics = app.musicDatabase.musicTable.listMusicsRecentlyAdded();
         for (Music music : musics) {
@@ -85,36 +96,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateGroupsRecentlyAdded() {
+    private void updateTagsRecentlyAdded() {
         Context context = getApplicationContext();
 
-        LinearLayout view = findViewById(R.id.groupContainer);
-        view.removeAllViews();
+        LinearLayout view = findViewById(R.id.tagContainer);
+        LinearLayout.LayoutParams params = initContainer(view);
 
-        int size = 200; // dp
-        int sizePx = UnitUtil.dp2px(context, size);
-        int margin = 8;
-        int marginPx = UnitUtil.dp2px(context, margin);
-
-        view.setPadding(marginPx, marginPx, 0, marginPx);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePx-marginPx*2, sizePx-marginPx*2);
-        params.setMargins(0, 0, marginPx, 0);
-
-        // TODO: consider: auto group generation/modification when tag created/added to music (create auto update/reuse logic)
-        // Group concept is really necessary? Only tags may be OK. -> artwork_path merge
         Tag[] tags = app.musicDatabase.tagTable.listTagsRecentlyAssigned();
         Group[] groups = new Group[tags.length];
         for (int i=0; i<tags.length; i++) {
             Tag tag = tags[i];
-            Music[] musics = app.musicDatabase.musicTagRelationTable.getMusics(tag); // musics.length > 0
-
-            Group group = new Group();
-            group.name = tag.name;
-            group.musics = musics;
-            group.artworkPath = null;
-
-            groups[i] = group;
+            groups[i] = new GeneratedTagGroup(tag);
         }
 
         for (Group group: groups) {
@@ -133,11 +125,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void updateAlbumsRecentlyAdded() {
+        Context context = getApplicationContext();
+
+        LinearLayout view = findViewById(R.id.albumContainer);
+        LinearLayout.LayoutParams params = initContainer(view);
+
+        Album[] albums = app.musicDatabase.albumTable.getAlbumsRecentlyAssigned();
+        Group[] groups = new Group[albums.length];
+        for (int i=0; i<albums.length; i++) {
+            Album album = albums[i];
+            groups[i] = new GeneratedAlbumGroup(album);
+        }
+
+        for (Group group: groups) {
+            final GroupArtworkEntryView artworkView = new GroupArtworkEntryView(context);
+            artworkView.setGroup(group);
+
+            artworkView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onGroupArtworkEntryClicked(artworkView);
+                }
+            });
+
+            view.addView(artworkView, params);
+        }
+    }
 
     public void updateList() {
         updateMusicsRecentlyAdded();
-        updateGroupsRecentlyAdded();
-
+        updateTagsRecentlyAdded();
+        updateAlbumsRecentlyAdded();
     }
 
     public void openMusicFileChooser() {
@@ -160,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: show music list
     public void onGroupArtworkEntryClicked(GroupArtworkEntryView artworkView) {
-        showToast(artworkView.getGroup().name, Toast.LENGTH_SHORT);
+        showToast(artworkView.getGroup().getName(getApplicationContext()), Toast.LENGTH_SHORT);
     }
 
 

@@ -1,8 +1,12 @@
-package com.github.aoirint.campmusicplayer.db;
+package com.github.aoirint.campmusicplayer.db.table;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.github.aoirint.campmusicplayer.db.MusicDatabase;
+import com.github.aoirint.campmusicplayer.db.data.Music;
+import com.github.aoirint.campmusicplayer.db.data.Tag;
 
 public class MusicTagRelationTable {
     MusicDatabase musicDatabase;
@@ -41,6 +45,17 @@ public class MusicTagRelationTable {
         return musicDatabase.musicTable.get(musicIds);
     }
 
+    // TODO: rewrite with INNER JOIN
+    public Music getLatestMusic(Tag tag) {
+        SQLiteDatabase db = musicDatabase.getReadableDatabase();
+
+        Cursor cur = db.rawQuery("SELECT musicId FROM musicTagRelation WHERE tagId=? ORDER BY created_at DESC LIMIT 1", new String[] { String.valueOf(tag.id) });
+        cur.moveToFirst();
+        int musicId = cur.getInt(0);
+
+        return musicDatabase.musicTable.get(musicId);
+    }
+
     public boolean addTag(Music music, Tag tag, long created_at) {
         if (hasTag(music, tag)) return false;
 
@@ -49,6 +64,7 @@ public class MusicTagRelationTable {
         values.put("musicId", music.id);
         values.put("tagId", tag.id);
         values.put("created_at", created_at);
+        values.put("updated_at", created_at);
 
         db.insert("musicTagRelation", null, values);
         return true;
@@ -85,7 +101,8 @@ public class MusicTagRelationTable {
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "musicId INTEGER, " +
                 "tagId INTEGER," +
-                "created_at INTEGER" +
+                "created_at INTEGER, " +
+                "updated_at INTEGER" +
                 ")"
         );
 

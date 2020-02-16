@@ -1,8 +1,11 @@
-package com.github.aoirint.campmusicplayer.db;
+package com.github.aoirint.campmusicplayer.db.table;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.github.aoirint.campmusicplayer.db.MusicDatabase;
+import com.github.aoirint.campmusicplayer.db.data.Tag;
 
 import java.util.HashMap;
 import java.util.Map;

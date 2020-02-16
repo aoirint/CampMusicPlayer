@@ -1,4 +1,4 @@
-package com.github.aoirint.campmusicplayer.db;
+package com.github.aoirint.campmusicplayer.db.data;
 
 import androidx.annotation.Nullable;
 
@@ -10,8 +10,8 @@ public class Tag implements Serializable {
     public String name;
 
     // UTC millis (System.currentTimeMillis)
-    Long created_at;
-    Long updated_at;
+    public Long created_at;
+    public Long updated_at;
 
     @Override
     public boolean equals(@Nullable Object obj) {

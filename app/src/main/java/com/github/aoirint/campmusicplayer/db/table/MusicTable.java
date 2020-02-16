@@ -1,12 +1,19 @@
-package com.github.aoirint.campmusicplayer.db;
+package com.github.aoirint.campmusicplayer.db.table;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
+
+import com.github.aoirint.campmusicplayer.db.MusicDatabase;
+import com.github.aoirint.campmusicplayer.db.data.Album;
+import com.github.aoirint.campmusicplayer.db.data.Music;
+import com.github.aoirint.campmusicplayer.db.data.MusicKey;
+import com.github.aoirint.campmusicplayer.db.data.group.Group;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MusicTable {
@@ -33,33 +40,44 @@ public class MusicTable {
     }
 
     Music loadFromCursor(Cursor cur) {
-        Music info = new Music();
+        Music music = new Music();
 
-        info.id = cur.getInt(0);
-        info.uri = cur.getString(1);
-        info.hash = cur.getString(2);
-        info.title = cur.getString(3);
-        info.artist = cur.getString(4);
-        info.album = cur.getString(5);
+        music.id = cur.getInt(0);
+        music.mbid = cur.getString(1);
+        music.uri = cur.getString(2);
+        music.hash = cur.getString(3);
+        music.title = cur.getString(4);
+        int albumId = cur.getInt(5);
 
-        info.genre = cur.getString(6);
-        info.duration = cur.getString(7);
-        info.year = cur.getString(8);
+        music.genre = cur.getString(6);
+        music.duration = cur.getString(7);
+        music.year = cur.getString(8);
 
-        info.discNumber = cur.getString(9);
-        info.cdTrackNumber = cur.getString(10);
-        info.numTracks = cur.getString(11);
+        music.discNumber = cur.getString(9);
+        music.cdTrackNumber = cur.getString(10);
+        music.numTracks = cur.getString(11);
 
-        info.author = cur.getString(12);
-        info.composer = cur.getString(13);
-        info.writer = cur.getString(14);
-        info.albumArtist = cur.getString(15);
+        music.author = cur.getString(12);
+        music.composer = cur.getString(13);
+        music.writer = cur.getString(14);
+        music.albumArtist = cur.getString(15);
 
-        info.created_at = cur.getLong(16);
-        info.updated_at = cur.getLong(17);
-        info.played_at = cur.getLong(18);
+        music.created_at = cur.getLong(16);
+        music.updated_at = cur.getLong(17);
+        music.played_at = cur.getLong(18);
 
-        return info;
+        music.album = musicDatabase.albumTable.get(albumId);
+
+        return music;
+    }
+    Music[] loadArrayFromCursor(Cursor cur) {
+        int count = cur.getCount();
+        Music[] musics = new Music[count];
+        for (int i=0; i<count; i++) {
+            cur.moveToNext();
+            musics[i] = loadFromCursor(cur);
+        }
+        return musics;
     }
 
     public void updatePlayedAt(Music info) {
@@ -75,15 +93,22 @@ public class MusicTable {
     }
 
 
-
-    public Music getOrLoad(Uri audioUri) throws IOException {
+    public Music getOrCreate(MusicKey key) throws IOException {
         SQLiteDatabase db = musicDatabase.getReadableDatabase();
-        Cursor cur = db.rawQuery("SELECT * FROM music WHERE uri=?", new String[] { audioUri.toString() });
+        Cursor cur = db.rawQuery("SELECT * FROM music WHERE uri=?", new String[] { key.uri.toString() });
         if (cur.moveToFirst()) {
             return loadFromCursor(cur);
         }
 
-        return loadAndRegister(audioUri);
+        return loadAndRegister(key);
+    }
+
+
+    public Music get(int musicId) {
+        SQLiteDatabase db = musicDatabase.getReadableDatabase();
+        Cursor cur = db.rawQuery("SELECT * FROM music WHERE id=?", new String[] { String.valueOf(musicId) });
+        cur.moveToFirst();
+        return loadFromCursor(cur);
     }
 
     @Deprecated
@@ -113,42 +138,43 @@ public class MusicTable {
         return musics;
     }
 
-    public Music loadAndRegister(Uri audioUri) throws IOException {
-        Music info = Music.createFromUri(musicDatabase.context, audioUri);
+    public Music loadAndRegister(MusicKey key) throws IOException {
+        Music music = Music.createFromKey(musicDatabase.context, key);
+        assert music.album.id != null;
 
         SQLiteDatabase db = musicDatabase.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put("uri", info.uri);
-        values.put("hash", info.hash);
-        values.put("title", info.title);
-        values.put("artist", info.artist);
-        values.put("album", info.album);
+        values.put("mbid", music.mbid);
+        values.put("uri", music.uri);
+        values.put("hash", music.hash);
+        values.put("title", music.title);
+        values.put("albumId", music.album.id);
 
-        values.put("genre", info.genre);
-        values.put("duration", info.duration);
-        values.put("year", info.year);
+        values.put("genre", music.genre);
+        values.put("duration", music.duration);
+        values.put("year", music.year);
 
-        values.put("discNumber", info.discNumber);
-        values.put("cdTrackNumber", info.cdTrackNumber);
-        values.put("numTracks", info.numTracks);
+        values.put("discNumber", music.discNumber);
+        values.put("cdTrackNumber", music.cdTrackNumber);
+        values.put("numTracks", music.numTracks);
 
-        values.put("author", info.author);
-        values.put("composer", info.composer);
-        values.put("writer", info.writer);
-        values.put("albumArtist", info.albumArtist);
+        values.put("author", music.author);
+        values.put("composer", music.composer);
+        values.put("writer", music.writer);
+        values.put("albumArtist", music.albumArtist);
 
-        values.put("created_at", info.created_at);
-        values.put("updated_at", info.updated_at);
-        values.put("played_at", info.played_at);
+        values.put("created_at", music.created_at);
+        values.put("updated_at", music.updated_at);
+        values.put("played_at", music.played_at);
 
         long rowId = db.insert("music", null, values);
         Cursor cur = db.rawQuery("SELECT id FROM music WHERE rowid=?", new String[] { String.valueOf(rowId) });
         cur.moveToFirst();
         int musicId = cur.getInt(0);
 
-        info.id = musicId;
-        return info;
+        music.id = musicId;
+        return music;
     }
 
 
@@ -157,11 +183,11 @@ public class MusicTable {
 
         db.execSQL("CREATE TABLE music(" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "mbid TEXT, " +
                 "uri TEXT, " +
                 "hash TEXT, " +
                 "title TEXT, " +
-                "artist TEXT, " +
-                "album TEXT, " +
+                "albumId INTEGER, " +
                 "genre TEXT, " +
                 "duration TEXT, " +
                 "year TEXT, " +

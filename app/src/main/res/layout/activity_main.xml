@@ -20,20 +20,20 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/labelGroups"
+                    android:id="@+id/labelTags"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginLeft="16dp"
                     android:layout_marginTop="16dp"
-                    android:text="@string/groups"
+                    android:text="Tags"
                     android:textColor="@color/colorForegroundDark"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -46,10 +46,10 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/labelGroups">
+                    app:layout_constraintTop_toBottomOf="@+id/labelTags">
 
                     <LinearLayout
-                        android:id="@+id/groupContainer"
+                        android:id="@+id/tagContainer"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="left"
@@ -95,9 +95,36 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:background="@color/dummy1">
+                android:layout_height="wrap_content">
 
+                <TextView
+                    android:id="@+id/labelAlbums"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Albums"
+                    android:textColor="@color/colorForegroundDark"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <HorizontalScrollView
+                    android:layout_width="0dp"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/dummy3"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/labelAlbums">
+
+                    <LinearLayout
+                        android:id="@+id/albumContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="left"
+                        android:orientation="horizontal" />
+                </HorizontalScrollView>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>

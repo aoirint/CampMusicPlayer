@@ -5,8 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.github.aoirint.campmusicplayer.db.Music;
+import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
+import com.github.aoirint.campmusicplayer.db.data.MusicKey;
 
 import java.io.IOException;
 
@@ -34,19 +35,20 @@ public class MainActivityAddMusicTask extends AsyncTask<Uri, Integer, Music[]> {
 
             context.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            Music info = null;
             try {
-                info = app.musicDatabase.musicTable.getOrLoad(uri);
-                app.artworkCacheManager.loadOrCreate(info);
+                MusicKey key = MusicKey.createFromUri(context, uri);
+                app.artworkCacheManager.loadOrCreate(uri);
 
-                if (delegate != null) delegate.onSuccess(info);
+                Music music = app.musicDatabase.musicTable.getOrCreate(key);
+                if (delegate != null) delegate.onSuccess(music);
+
+                musics[index] = music;
 
             } catch (IOException error) {
                 error.printStackTrace();
                 if (delegate != null) delegate.onFailed(uri, error);
             }
 
-            musics[index] = info;
             publishProgress(index+1);
         }
 
