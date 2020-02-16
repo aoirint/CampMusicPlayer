@@ -1,5 +1,7 @@
 package com.github.aoirint.campmusicplayer.db;
 
+import androidx.annotation.Nullable;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,6 +12,16 @@ public class Tag implements Serializable {
     // UTC millis (System.currentTimeMillis)
     Long created_at;
     Long updated_at;
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (! (obj instanceof Tag)) return false;
+        Tag other = (Tag) obj;
+        if (this.id == null && other.id == null) { // not in Database
+            return Tag.isSame(this, other.name);
+        }
+        return this.id == other.id; // in Database
+    }
 
     public static boolean isSame(Tag tag, String tagName) {
         return tag.name.equals(tagName);

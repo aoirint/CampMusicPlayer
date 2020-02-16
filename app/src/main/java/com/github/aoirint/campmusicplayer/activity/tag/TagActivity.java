@@ -11,6 +11,8 @@ import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -31,6 +33,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.github.aoirint.campmusicplayer.activity.main.MainActivity.logger;
 
 public class TagActivity extends AppCompatActivity {
     Context context;
@@ -110,17 +114,32 @@ public class TagActivity extends AppCompatActivity {
 
         Tag[] candidates = !name.isEmpty() ? app.musicDatabase.tagTable.search(name) : new Tag[0];
         candidateTags = new ArrayList<>(Arrays.asList(candidates));
+
+        tagSearchListAdapter.notifyDataSetChanged(); // make listview unfocusable; otherwise inputtextview lose focus
     }
 
     void unfocusTagInput() {
+        tagInputTextView.setText("");
+
         tagInputTextView.clearFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(tagInputTextView.getWindowToken(), 0);
+
+        showSelectListView();
     }
 
     void loadIntent() {
         Intent intent = getIntent();
         musics = (Music[]) intent.getSerializableExtra("musics");
+    }
+
+    void showSelectListView() {
+        tagSelectListView.setVisibility(View.VISIBLE);
+        tagSearchListView.setVisibility(View.INVISIBLE);
+    }
+    void showSearchListView() {
+        tagSelectListView.setVisibility(View.INVISIBLE);
+        tagSearchListView.setVisibility(View.VISIBLE);
     }
 
     void initTagInputTextView() {
@@ -148,14 +167,11 @@ public class TagActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 updateCandidates();
-
-                if (s.length() != 0) {
-                    tagSelectListView.setVisibility(View.INVISIBLE);
-                    tagSearchListView.setVisibility(View.VISIBLE);
+                if (s.length() == 0) {
+                    showSelectListView();
                 }
                 else {
-                    tagSelectListView.setVisibility(View.VISIBLE);
-                    tagSearchListView.setVisibility(View.INVISIBLE);
+                    showSearchListView();
                 }
             }
             @Override
@@ -188,6 +204,7 @@ public class TagActivity extends AppCompatActivity {
 
     void initSelectListView() {
         tagSelectListView = findViewById(R.id.tagSelectListView);
+        tagSelectListView.setFocusable(false);
         tagSelectListAdapter = new BaseAdapter() {
             @Override
             public int getCount() {
@@ -276,8 +293,6 @@ public class TagActivity extends AppCompatActivity {
                 selectionTags.add(0, tag);
                 checkStates.add(0, TriCheckState.CHECKED);
 
-                tagInputTextView.setText("");
-
                 tagSelectListAdapter.notifyDataSetChanged();
                 unfocusTagInput();
             }
@@ -287,6 +302,7 @@ public class TagActivity extends AppCompatActivity {
 
     void initSearchListView() {
         tagSearchListView = findViewById(R.id.tagSearchListView);
+        tagSearchListView.setFocusable(false);
         tagSearchListAdapter = new BaseAdapter() {
             @Override
             public int getCount() {
@@ -317,7 +333,7 @@ public class TagActivity extends AppCompatActivity {
 
                 int tagIndex = selectionTags.indexOf(tag);
                 TriCheckState checkState = TriCheckState.UNCHECKED;
-                if (tagIndex != -1) checkState = checkStates.get(position);
+                if (tagIndex != -1) checkState = checkStates.get(tagIndex);
 
                 TriCheckState prevCheckState = checkBox.getCheckState();
                 if (checkState != prevCheckState) {
@@ -330,7 +346,16 @@ public class TagActivity extends AppCompatActivity {
                 checkBox.delegate = new TriStateCheckbox.Delegate() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, TriCheckState checkState) {
-                        checkStates.set(position, checkState);
+                        int tagIndex = selectionTags.indexOf(tag);
+
+                        if (tagIndex == -1) {
+                            selectionTags.add(0, tag);
+                            checkStates.add(0, checkState);
+                        }
+                        else {
+                            checkStates.set(tagIndex, checkState);
+                        }
+
                         tagSelectListAdapter.notifyDataSetChanged();
                     }
                 };
