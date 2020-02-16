@@ -31,19 +31,30 @@ public class CampMusicPlayer extends Application implements ServiceConnection {
         artworkCacheManager = new ArtworkCacheManager(context);
         musicPlayer = new MusicPlayer(context);
 
+        startService();
+    }
+
+    void startService() {
         Intent intent = new Intent(this, MediaPlayerService.class);
         startService(intent);
         bindService(intent, this, Context.BIND_AUTO_CREATE);
     }
 
     public void sendUpdateNotification() {
-        if (messenger == null) return;
+        if (messenger == null) startService();
 
         try {
             messenger.send(Message.obtain(null, 0));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public void closeNotification() {
+        unbindService(this);
+        stopService(new Intent(this, MediaPlayerService.class));
+
+        musicPlayer.clearMediaPlayer();
     }
 
     @Override

@@ -42,9 +42,11 @@ public class MediaPlayerBroadcastReceiver extends BroadcastReceiver {
             case "next":
                 app.musicPlayer.goNext();
                 break;
+            case "close":
+                app.closeNotification();
+                return;
         }
 
-        app.sendUpdateNotification();
     }
 
 }

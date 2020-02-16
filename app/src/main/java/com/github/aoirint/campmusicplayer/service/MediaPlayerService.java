@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.R;
+import com.github.aoirint.campmusicplayer.activity.main.MainActivity;
 import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.music.MusicPlayer;
 import com.github.aoirint.campmusicplayer.util.BitmapUtil;
@@ -27,6 +28,7 @@ import java.io.IOException;
 
 public class MediaPlayerService extends Service {
     Messenger messenger;
+    MediaPlayerBroadcastReceiver broadcastReceiver;
 
     @Override
     public void onCreate() {
@@ -39,7 +41,10 @@ public class MediaPlayerService extends Service {
         intentFilter.addAction("pause");
         intentFilter.addAction("previous");
         intentFilter.addAction("next");
-        registerReceiver(new MediaPlayerBroadcastReceiver(), intentFilter);
+        intentFilter.addAction("close");
+
+        broadcastReceiver = new MediaPlayerBroadcastReceiver();
+        registerReceiver(broadcastReceiver, intentFilter);
 
         updateNotification();
     }
@@ -53,21 +58,23 @@ public class MediaPlayerService extends Service {
         Notification.Builder builder;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId, channelTitle, NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel channel = new NotificationChannel(channelId, channelTitle, NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(channel);
 
             builder = new Notification.Builder(this, channelId);
         }
         else {
             builder = new Notification.Builder(this);
+            builder.setPriority(Notification.PRIORITY_MAX);
         }
 
         CampMusicPlayer app = (CampMusicPlayer) getApplication();
         MusicPlayer musicPlayer = app.musicPlayer;
 
-        PendingIntent mainActivityIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(), 0);
+        PendingIntent mainActivityIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class), 0);
         PendingIntent prevIntent = PendingIntent.getBroadcast(getApplicationContext(), 3, new Intent("previous"), 0);
         PendingIntent nextIntent = PendingIntent.getBroadcast(getApplicationContext(), 4, new Intent("next"), 0);
+        PendingIntent closeIntent = PendingIntent.getBroadcast(getApplicationContext(), 5, new Intent("close"), 0);
 
         Music music = musicPlayer.getCurrentMusic();
         String title = "";
@@ -90,6 +97,7 @@ public class MediaPlayerService extends Service {
 
         Notification.Action prevAction = new Notification.Action(R.drawable.ic_skip_previous_7f7f7f_32dp, "Previous", prevIntent);
         Notification.Action nextAction = new Notification.Action(R.drawable.ic_skip_next_7f7f7f_32dp, "Next", nextIntent);
+        Notification.Action closeAction = new Notification.Action(R.drawable.ic_close_7f7f7f_32dp, "Close", closeIntent);
         Notification.Action playAction;
         if (musicPlayer.isPlaying()) {
             PendingIntent pauseIntent = PendingIntent.getBroadcast(getApplicationContext(), 2, new Intent("pause"), 0);
@@ -105,6 +113,8 @@ public class MediaPlayerService extends Service {
                 .setContentText(description)
                 .setSmallIcon(R.drawable.ic_music_note_7f7f7f_32dp)
                 .setStyle(style)
+                .setTicker(null)
+                .setOnlyAlertOnce(true)
                 .setContentIntent(mainActivityIntent);
 
         if (music != null) {
@@ -112,22 +122,28 @@ public class MediaPlayerService extends Service {
                 builder.setColorized(true);
             }
 
-            builder.setStyle(style.setShowActionsInCompactView(0,1,2))
+            builder.setStyle(style.setShowActionsInCompactView(0,1,2,3))
                     .setColor(color)
                     .setLargeIcon(artwork)
                     .addAction(prevAction)
                     .addAction(playAction)
                     .addAction(nextAction);
         }
+        else {
+            builder.setStyle(style.setShowActionsInCompactView(0));
+        }
+        builder.addAction(closeAction);
 
 
         Notification notification = builder.build();
         startForeground(1, notification);
+        notificationManager.cancel(1);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
     }
 
     @Nullable

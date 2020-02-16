@@ -40,12 +40,13 @@ public class MusicPlayer {
 
     public void clearMediaPlayer() {
         if (mediaPlayer == null) return;
-        equalizer.release();
-        equalizer = null;
 
         mediaPlayer.stop();
         mediaPlayer.release();
         mediaPlayer = null;
+
+        equalizer.release();
+        equalizer = null;
 
         pausing = false;
     }
@@ -81,23 +82,32 @@ public class MusicPlayer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        app.sendUpdateNotification();
     }
 
+    // FIXME: recreate closed notification when start playing
     public void play() {
         reset();
         mediaPlayer.start();
+
+        app.sendUpdateNotification();
     }
 
     public void pause() {
         if (mediaPlayer == null) return;
         mediaPlayer.pause();
         pausing = true;
+
+        app.sendUpdateNotification();
     }
 
     public void resume() {
         if (mediaPlayer == null) return;
         mediaPlayer.start();
         pausing = false;
+
+        app.sendUpdateNotification();
     }
 
     public boolean isPausing() {
@@ -159,6 +169,8 @@ public class MusicPlayer {
         this.music = null;
         this.artworkFile = null;
         clearMediaPlayer();
+
+        app.sendUpdateNotification();
     }
     public void setQueue(Group group) {
         Music[] musics = group.getMusics(context);
