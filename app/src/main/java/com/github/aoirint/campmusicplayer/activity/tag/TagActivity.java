@@ -148,6 +148,15 @@ public class TagActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 updateCandidates();
+
+                if (s.length() != 0) {
+                    tagSelectListView.setVisibility(View.INVISIBLE);
+                    tagSearchListView.setVisibility(View.VISIBLE);
+                }
+                else {
+                    tagSelectListView.setVisibility(View.VISIBLE);
+                    tagSearchListView.setVisibility(View.INVISIBLE);
+                }
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

@@ -40,6 +40,7 @@ public class GroupArtworkEntryView extends ConstraintLayout {
 
         Bitmap artwork = null;
         try {
+            // TODO: artwork handling
             if (group.artworkPath == null) {
                 Music first = group.musics[0]; // > 0
                 artwork = app.artworkCacheManager.loadOrCreate(first);

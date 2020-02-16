@@ -45,6 +45,7 @@ public class TagTable {
         return result;
     }
 
+    @Deprecated
     public Tag[] get(int[] tagIds) {
         StringBuilder sb = new StringBuilder();
         for (int index=0; index<tagIds.length; index++) {
@@ -65,7 +66,7 @@ public class TagTable {
 
         Tag[] tags = new Tag[count];
         for (int i=0; i<count; i++) {
-            tags[i] = id2TagMap.get(tagIds[i]);
+            tags[i] = id2TagMap.get(tagIds[i]); // keep order
         }
 
         return tags;

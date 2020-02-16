@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(sizePx-marginPx*2, sizePx-marginPx*2);
         params.setMargins(0, 0, marginPx, 0);
 
+        // TODO: consider: auto group generation/modification when tag created/added to music (create auto update/reuse logic)
+        // Group concept is really necessary? Only tags may be OK. -> artwork_path merge
         Tag[] tags = app.musicDatabase.tagTable.listTagsRecentlyAssigned();
         Group[] groups = new Group[tags.length];
         for (int i=0; i<tags.length; i++) {
@@ -156,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, MUSIC_TAG_REQUEST_CODE);
     }
 
+    // TODO: show music list
     public void onGroupArtworkEntryClicked(GroupArtworkEntryView artworkView) {
         showToast(artworkView.getGroup().name, Toast.LENGTH_SHORT);
     }

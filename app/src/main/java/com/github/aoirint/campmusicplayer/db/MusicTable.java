@@ -86,6 +86,7 @@ public class MusicTable {
         return loadAndRegister(audioUri);
     }
 
+    @Deprecated
     public Music[] get(int[] musicIds) {
         StringBuilder sb = new StringBuilder();
         for (int index=0; index<musicIds.length; index++) {
@@ -106,7 +107,7 @@ public class MusicTable {
 
         Music[] musics = new Music[count];
         for (int i=0; i<count; i++) {
-            musics[i] = id2MusicMap.get(musicIds[i]);
+            musics[i] = id2MusicMap.get(musicIds[i]); // keep order
         }
 
         return musics;

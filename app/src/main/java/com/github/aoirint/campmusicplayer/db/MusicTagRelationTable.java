@@ -11,6 +11,7 @@ public class MusicTagRelationTable {
         this.musicDatabase = musicDatabase;
     }
 
+    // TODO: rewrite with INNER JOIN
     public Tag[] getTags(Music music) {
         SQLiteDatabase db = musicDatabase.getReadableDatabase();
 
@@ -25,6 +26,7 @@ public class MusicTagRelationTable {
         return musicDatabase.tagTable.get(tagIds);
     }
 
+    // TODO: rewrite with INNER JOIN
     public Music[] getMusics(Tag tag) {
         SQLiteDatabase db = musicDatabase.getReadableDatabase();
 
