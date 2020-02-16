@@ -1,5 +1,6 @@
 package com.github.aoirint.campmusicplayer.db.data;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.Serializable;
@@ -19,6 +20,12 @@ public class Album implements Serializable {
     public Album(AlbumKey key) {
         this.name = key.name;
         this.artist = key.artist;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return name;
     }
 
     @Override

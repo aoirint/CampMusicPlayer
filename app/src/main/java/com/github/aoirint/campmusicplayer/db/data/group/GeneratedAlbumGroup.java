@@ -35,4 +35,9 @@ public class GeneratedAlbumGroup implements Group {
         return app.artworkCacheManager.loadOrCreate(first.getUri());
     }
 
+    @Override
+    public boolean isEditable() {
+        return false;
+    }
+
 }

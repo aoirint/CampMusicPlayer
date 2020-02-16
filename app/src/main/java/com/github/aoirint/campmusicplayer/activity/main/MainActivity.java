@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +19,7 @@ import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.R;
 import com.github.aoirint.campmusicplayer.activity.main.view.GroupArtworkEntryView;
 import com.github.aoirint.campmusicplayer.activity.main.view.MusicArtworkEntryView;
+import com.github.aoirint.campmusicplayer.activity.group.GroupActivity;
 import com.github.aoirint.campmusicplayer.activity.tag.TagActivity;
 import com.github.aoirint.campmusicplayer.db.data.Album;
 import com.github.aoirint.campmusicplayer.db.data.group.GeneratedAlbumGroup;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         app = (CampMusicPlayer) getApplication();
 
         updateList();
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
     // TODO: create class
@@ -179,7 +182,12 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: show music list
     public void onGroupArtworkEntryClicked(GroupArtworkEntryView artworkView) {
-        showToast(artworkView.getGroup().getName(getApplicationContext()), Toast.LENGTH_SHORT);
+        Group group = artworkView.getGroup();
+
+        Intent intent = new Intent(this, GroupActivity.class);
+        intent.putExtra("group", group);
+
+        startActivity(intent);
     }
 
 

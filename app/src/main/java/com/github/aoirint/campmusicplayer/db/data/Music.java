@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import androidx.annotation.NonNull;
+
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import java.io.Serializable;
 
@@ -68,6 +70,12 @@ public class Music implements Serializable {
 
     public Uri getUri() {
         return Uri.parse(uri);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return title;
     }
 
     public static Music createFromKey(Context context, MusicKey key) {

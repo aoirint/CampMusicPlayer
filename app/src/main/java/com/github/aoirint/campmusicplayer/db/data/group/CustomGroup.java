@@ -38,4 +38,9 @@ public class CustomGroup implements Group {
         return app.artworkCacheManager.loadArtworkCache(artworkFile);
     }
 
+    @Override
+    public boolean isEditable() {
+        return true;
+    }
+
 }

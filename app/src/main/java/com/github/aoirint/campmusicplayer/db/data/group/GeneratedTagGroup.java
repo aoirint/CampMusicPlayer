@@ -38,4 +38,9 @@ public class GeneratedTagGroup implements Group {
         return app.artworkCacheManager.loadOrCreate(first.getUri());
     }
 
+    @Override
+    public boolean isEditable() {
+        return false;
+    }
+
 }
