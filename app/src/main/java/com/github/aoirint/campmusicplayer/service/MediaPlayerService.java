@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.media.AudioAttributes;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -16,6 +17,7 @@ import android.os.Message;
 import android.os.Messenger;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.R;
@@ -28,25 +30,12 @@ import java.io.IOException;
 
 public class MediaPlayerService extends Service {
     Messenger messenger;
-    MediaPlayerBroadcastReceiver broadcastReceiver;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         messenger = new Messenger(new MediaPlayerHandler());
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("play");
-        intentFilter.addAction("pause");
-        intentFilter.addAction("previous");
-        intentFilter.addAction("next");
-        intentFilter.addAction("close");
-
-        broadcastReceiver = new MediaPlayerBroadcastReceiver();
-        registerReceiver(broadcastReceiver, intentFilter);
-
-        updateNotification();
     }
 
     void updateNotification() {
@@ -59,6 +48,8 @@ public class MediaPlayerService extends Service {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId, channelTitle, NotificationManager.IMPORTANCE_HIGH);
+            channel.setSound(null, new AudioAttributes.Builder().build());
+            channel.enableVibration(false);
             notificationManager.createNotificationChannel(channel);
 
             builder = new Notification.Builder(this, channelId);
@@ -71,10 +62,10 @@ public class MediaPlayerService extends Service {
         CampMusicPlayer app = (CampMusicPlayer) getApplication();
         MusicPlayer musicPlayer = app.musicPlayer;
 
-        PendingIntent mainActivityIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class), 0);
-        PendingIntent prevIntent = PendingIntent.getBroadcast(getApplicationContext(), 3, new Intent("previous"), 0);
-        PendingIntent nextIntent = PendingIntent.getBroadcast(getApplicationContext(), 4, new Intent("next"), 0);
-        PendingIntent closeIntent = PendingIntent.getBroadcast(getApplicationContext(), 5, new Intent("close"), 0);
+        PendingIntent mainActivityPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK), 0);
+        PendingIntent prevPendingIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("previous"), 0);
+        PendingIntent nextPendingIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("next"), 0);
+        PendingIntent closePendingIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("close"), 0);
 
         Music music = musicPlayer.getCurrentMusic();
         String title = "";
@@ -95,16 +86,16 @@ public class MediaPlayerService extends Service {
             }
         }
 
-        Notification.Action prevAction = new Notification.Action(R.drawable.ic_skip_previous_7f7f7f_32dp, "Previous", prevIntent);
-        Notification.Action nextAction = new Notification.Action(R.drawable.ic_skip_next_7f7f7f_32dp, "Next", nextIntent);
-        Notification.Action closeAction = new Notification.Action(R.drawable.ic_close_7f7f7f_32dp, "Close", closeIntent);
+        Notification.Action prevAction = new Notification.Action(R.drawable.ic_skip_previous_7f7f7f_32dp, "Previous", prevPendingIntent);
+        Notification.Action nextAction = new Notification.Action(R.drawable.ic_skip_next_7f7f7f_32dp, "Next", nextPendingIntent);
+        Notification.Action closeAction = new Notification.Action(R.drawable.ic_close_7f7f7f_32dp, "Close", closePendingIntent);
         Notification.Action playAction;
         if (musicPlayer.isPlaying()) {
-            PendingIntent pauseIntent = PendingIntent.getBroadcast(getApplicationContext(), 2, new Intent("pause"), 0);
+            PendingIntent pauseIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("pause"), 0);
             playAction = new Notification.Action(R.drawable.ic_pause_7f7f7f_32dp, "Pause", pauseIntent);
         }
         else {
-            PendingIntent playIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, new Intent("play"), 0);
+            PendingIntent playIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("play"), 0);
             playAction = new Notification.Action(R.drawable.ic_play_arrow_white_32dp, "Play", playIntent);
         }
         Notification.MediaStyle style = new Notification.MediaStyle();
@@ -115,7 +106,7 @@ public class MediaPlayerService extends Service {
                 .setStyle(style)
                 .setTicker(null)
                 .setOnlyAlertOnce(true)
-                .setContentIntent(mainActivityIntent);
+                .setContentIntent(mainActivityPendingIntent);
 
         if (music != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -134,16 +125,56 @@ public class MediaPlayerService extends Service {
         }
         builder.addAction(closeAction);
 
-
         Notification notification = builder.build();
         startForeground(1, notification);
-        notificationManager.cancel(1);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        CampMusicPlayer app = (CampMusicPlayer) getApplicationContext();
+
+        switch (intent.getAction()) {
+            case "start":
+                updateNotification();
+                break;
+            case "play":
+                if (app.musicPlayer.isPausing()) {
+                    app.musicPlayer.resume();
+                }
+                else {
+                    app.musicPlayer.play();
+                }
+                break;
+            case "pause":
+                app.musicPlayer.pause();
+                break;
+            case "previous":
+                if (! app.musicPlayer.isBeginning()) {
+                    if (app.musicPlayer.isPlaying()) {
+                        app.musicPlayer.play(); // reset
+                    }
+                    else {
+                        app.musicPlayer.reset();
+                    }
+                }
+                else {
+                    app.musicPlayer.goPrev();
+                }
+                break;
+            case "next":
+                app.musicPlayer.goNext();
+                break;
+            case "close":
+                stopForeground(true);
+                stopSelf();
+        }
+
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(broadcastReceiver);
     }
 
     @Nullable

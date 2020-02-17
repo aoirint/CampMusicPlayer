@@ -35,7 +35,7 @@ public class CampMusicPlayer extends Application implements ServiceConnection {
     }
 
     void startService() {
-        Intent intent = new Intent(this, MediaPlayerService.class);
+        Intent intent = new Intent(this, MediaPlayerService.class).setAction("start");
         startService(intent);
         bindService(intent, this, Context.BIND_AUTO_CREATE);
     }
