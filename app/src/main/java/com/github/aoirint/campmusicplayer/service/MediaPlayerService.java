@@ -46,9 +46,10 @@ public class MediaPlayerService extends Service {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification.Builder builder;
 
+        NotificationChannel channel = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId, channelTitle, NotificationManager.IMPORTANCE_HIGH);
-            channel.setSound(null, new AudioAttributes.Builder().build());
+            channel = new NotificationChannel(channelId, channelTitle, NotificationManager.IMPORTANCE_LOW);
+            channel.setSound(null, null);
             channel.enableVibration(false);
             notificationManager.createNotificationChannel(channel);
 
@@ -165,6 +166,7 @@ public class MediaPlayerService extends Service {
                 app.musicPlayer.goNext();
                 break;
             case "close":
+                app.musicPlayer.stop();
                 stopForeground(true);
                 stopSelf();
         }
@@ -175,6 +177,9 @@ public class MediaPlayerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        CampMusicPlayer app = (CampMusicPlayer) getApplicationContext();
+        app.musicPlayer.stop();
     }
 
     @Nullable

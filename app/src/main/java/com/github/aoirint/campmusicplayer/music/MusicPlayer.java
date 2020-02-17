@@ -94,6 +94,10 @@ public class MusicPlayer {
         app.sendUpdateNotification();
     }
 
+    public void stop() {
+        clearMediaPlayer();
+    }
+
     public void pause() {
         if (mediaPlayer == null) return;
         mediaPlayer.pause();
