@@ -11,6 +11,7 @@ import android.net.Uri;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 
 // TODO: seek
 public class KaraokeMusicPlayer implements IMusicPlayer {
@@ -84,6 +85,7 @@ public class KaraokeMusicPlayer implements IMusicPlayer {
             @Override
             public void run() {
                 MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+                final int pcmEncoding = format.getInteger(MediaFormat.KEY_PCM_ENCODING);
 
                 while (playing) {
                     while (pausing) {
@@ -120,22 +122,45 @@ public class KaraokeMusicPlayer implements IMusicPlayer {
                     byte[] outBytes = new byte[byteCount];
                     outputBuffer.get(outBytes);
 
-                    int sampleSize = 2; // 16 bits
-                    int waveMax = (0b1 << (8*sampleSize-1)) - 1;
-                    int waveMin = -waveMax - 1;
-                    for (int i=0; i<byteCount/4; i++) {
-                        int waveLeft = (outBytes[i*4] << 8) | outBytes[i*4 + 1];
-                        int waveRight = (outBytes[i*4 + 2] << 8) | outBytes[i*4 + 3];
+                    if (pcmEncoding == AudioFormat.ENCODING_PCM_16BIT) {
+                        // ShortBuffer buffer = outputBuffer.asShortBuffer();
 
-                        int sub = waveLeft - waveRight;
-                        int wave = Math.min(Math.max(waveMin, sub), waveMax);
+                        int sampleSize = 2; // 16 bits
+                        int waveMax = (0b1 << (8*sampleSize-1)) - 1;
+                        int waveMin = -waveMax - 1;
+                        for (int i=0; i<byteCount/4; i++) {
+                            int waveLeft = (outBytes[i*4] << 8) | outBytes[i*4 + 1];
+                            int waveRight = (outBytes[i*4 + 2] << 8) | outBytes[i*4 + 3];
 
-                        byte[] value = ByteBuffer.allocate(2).putShort((short) wave).array();
+                            int sub = waveLeft - waveRight;
+                            int wave = Math.min(Math.max(waveMin, sub), waveMax);
 
-                        outBytes[i*4] = value[0];
-                        outBytes[i*4 + 1] = value[1];
-                        outBytes[i*4 + 2] = value[0];
-                        outBytes[i*4 + 3] = value[1];
+                            byte[] value = ByteBuffer.allocate(2).putShort((short) wave).array();
+
+                            outBytes[i*4] = value[0];
+                            outBytes[i*4 + 1] = value[1];
+                            outBytes[i*4 + 2] = value[0];
+                            outBytes[i*4 + 3] = value[1];
+                        }
+
+                    }
+                    else if (pcmEncoding == AudioFormat.ENCODING_PCM_8BIT) {
+
+                        int sampleSize = 1; // 16 bits
+                        int waveMax = (0b1 << (8*sampleSize-1)) - 1;
+                        int waveMin = -waveMax - 1;
+                        for (int i=0; i<byteCount/2; i++) {
+                            int waveLeft = outBytes[i*2];
+                            int waveRight = outBytes[i*2 + 1];
+
+                            int sub = waveLeft - waveRight;
+                            int wave = Math.min(Math.max(waveMin, sub), waveMax);
+                            byte value = (byte) wave;
+
+                            outBytes[i*2] = value;
+                            outBytes[i*2 + 1] = value;
+                        }
+
                     }
 
                     track.write(outBytes, info.offset, info.size);
@@ -198,6 +223,9 @@ public class KaraokeMusicPlayer implements IMusicPlayer {
 
         int channelCount = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
         if (channelCount != 2) throw new IOException("Stereo audio is required.");
+
+        int pcmEncoding = format.getInteger(MediaFormat.KEY_PCM_ENCODING);
+        if (pcmEncoding == AudioFormat.ENCODING_PCM_FLOAT) throw new IOException("PCM Float format is not supported.");
 
         this.extractor = extractor;
         this.decoder = decoder;
