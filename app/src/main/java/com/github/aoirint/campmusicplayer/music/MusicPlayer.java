@@ -1,6 +1,7 @@
 package com.github.aoirint.campmusicplayer.music;
 
 import android.content.Context;
+import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.audiofx.Equalizer;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.os.PowerManager;
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.db.data.group.Group;
+import com.github.aoirint.campmusicplayer.util.MusicUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,6 +79,7 @@ public class MusicPlayer {
 
         initMediaPlayer();
         try {
+            mediaPlayer.reset();
             mediaPlayer.setDataSource(context, music.getUri());
             mediaPlayer.prepare();
         } catch (IOException e) {
@@ -86,12 +89,21 @@ public class MusicPlayer {
         app.sendUpdateNotification();
     }
 
-    // FIXME: recreate closed notification when start playing
+    AudioTrack track;
     public void play() {
         reset();
-        mediaPlayer.start();
+
+        // TODO: karaoke play feature
+//        mediaPlayer.stop();
+//
+//        try {
+//            track = MusicUtil.playKaraoke(context, music.getUri());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         app.sendUpdateNotification();
+
     }
 
     public void stop() {
