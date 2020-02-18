@@ -62,7 +62,7 @@ public class MusicQueuePlayer {
         musicPlayer.setOnCompletionListener(new IMusicPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(IMusicPlayer musicPlayer) {
-                clearMusicPlayer();
+                goNext();
             }
         });
 
