@@ -161,7 +161,7 @@
             app:srcCompat="@drawable/ic_remove_white_32dp" />
 
         <ImageButton
-            android:id="@+id/playButton"
+            android:id="@+id/toggleRepeatingButton"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:background="@drawable/touch_highlight"
@@ -169,7 +169,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/ic_playlist_play_white_32dp" />
+            app:srcCompat="@drawable/ic_repeat_white_32dp" />
+
+        <ImageButton
+            android:id="@+id/toggleKaraokeButton"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/touch_highlight"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/toggleRepeatingButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:srcCompat="@drawable/ic_music_voice" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

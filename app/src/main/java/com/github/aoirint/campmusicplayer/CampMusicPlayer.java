@@ -54,7 +54,7 @@ public class CampMusicPlayer extends Application implements ServiceConnection {
         unbindService(this);
         stopService(new Intent(this, MediaPlayerService.class));
 
-        musicQueuePlayer.clearMediaPlayer();
+        musicQueuePlayer.clearMusicPlayer();
     }
 
     @Override

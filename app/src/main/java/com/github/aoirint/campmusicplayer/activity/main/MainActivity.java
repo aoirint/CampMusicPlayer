@@ -2,9 +2,7 @@ package com.github.aoirint.campmusicplayer.activity.main;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
-import android.Manifest;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -41,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     public static Logger logger = Logger.getLogger("CampMusicPlayer");
 
     CampMusicPlayer app;
+    ImageButton toggleRepeatingButton;
+    ImageButton toggleKaraokeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,37 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openMusicFileChooser();
+            }
+        });
+
+        toggleRepeatingButton = findViewById(R.id.toggleRepeatingButton);
+        toggleKaraokeButton = findViewById(R.id.toggleKaraokeButton);
+
+        toggleRepeatingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean repeating = ! app.musicQueuePlayer.isRepeating();
+                app.musicQueuePlayer.setRepeating(repeating);
+
+                int icon;
+                if (repeating) icon = R.drawable.ic_repeat_white_32dp;
+                else icon = R.drawable.ic_arrow_forward_white_32dp;
+
+                toggleRepeatingButton.setImageResource(icon);
+            }
+        });
+
+        toggleKaraokeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean karaoke = ! app.musicQueuePlayer.isKaraoke();
+                app.musicQueuePlayer.setKaraoke(karaoke);
+
+                int icon;
+                if (karaoke) icon = R.drawable.ic_music_note_white_32dp;
+                else icon = R.drawable.ic_music_voice;
+
+                toggleKaraokeButton.setImageResource(icon);
             }
         });
 

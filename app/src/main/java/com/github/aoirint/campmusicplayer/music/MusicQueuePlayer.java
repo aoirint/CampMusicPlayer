@@ -1,15 +1,14 @@
 package com.github.aoirint.campmusicplayer.music;
 
 import android.content.Context;
-import android.media.AudioTrack;
-import android.media.MediaPlayer;
-import android.media.audiofx.Equalizer;
 import android.net.Uri;
-import android.os.PowerManager;
 
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.db.data.group.Group;
+import com.github.aoirint.campmusicplayer.music.player.KaraokeMusicPlayer;
+import com.github.aoirint.campmusicplayer.music.player.IMusicPlayer;
+import com.github.aoirint.campmusicplayer.music.player.BasicMusicPlayer;
 import com.github.aoirint.campmusicplayer.music.queue.ImmutableQueuePlayer;
 import com.github.aoirint.campmusicplayer.music.queue.QueuePlayer;
 
@@ -19,15 +18,15 @@ import java.io.IOException;
 public class MusicQueuePlayer {
     Context context;
     CampMusicPlayer app;
-    MediaPlayer mediaPlayer;
-    Equalizer equalizer;
+    IMusicPlayer musicPlayer;
 
     QueuePlayer queue;
     Music music;
     File artworkFile;
 
     boolean pausing;
-    boolean loop;
+    boolean repeating = true;
+    boolean karaoke;
 
     public MusicQueuePlayer(Context context) {
         this.context = context;
@@ -41,48 +40,43 @@ public class MusicQueuePlayer {
         return artworkFile;
     }
 
-    public void clearMediaPlayer() {
-        if (mediaPlayer == null) return;
+    public void clearMusicPlayer() {
+        if (musicPlayer == null) return;
 
-        mediaPlayer.stop();
-        mediaPlayer.release();
-        mediaPlayer = null;
-
-        equalizer.release();
-        equalizer = null;
+        musicPlayer.stop();
+        musicPlayer.release();
+        musicPlayer = null;
 
         pausing = false;
     }
     public void initMediaPlayer() {
-        clearMediaPlayer();
+        clearMusicPlayer();
 
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setWakeMode(context, PowerManager.PARTIAL_WAKE_LOCK);
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        if (! karaoke) {
+            musicPlayer = new BasicMusicPlayer(context);
+        }
+        else {
+            musicPlayer = new KaraokeMusicPlayer(context);
+        }
+
+        musicPlayer.setOnCompletionListener(new IMusicPlayer.OnCompletionListener() {
             @Override
-            public void onCompletion(MediaPlayer mp) {
-                clearMediaPlayer();
+            public void onCompletion(IMusicPlayer musicPlayer) {
+                clearMusicPlayer();
             }
         });
 
-        equalizer = new Equalizer(0, mediaPlayer.getAudioSessionId());
-        equalizer.setEnabled(true);
-        short numOfBands = equalizer.getNumberOfBands();
-        short minLevel = equalizer.getBandLevelRange()[0];
-        for (short i=0; i<numOfBands; i++) {
-            equalizer.setBandLevel(i, minLevel);
-        }
     }
 
     public void reset() {
-        clearMediaPlayer();
+        clearMusicPlayer();
         if (music == null) return;
 
         initMediaPlayer();
         try {
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(context, music.getUri());
-            mediaPlayer.prepare();
+            musicPlayer.release();
+            musicPlayer.setDataSource(context, music.getUri());
+            musicPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,38 +84,29 @@ public class MusicQueuePlayer {
         app.sendUpdateNotification();
     }
 
-    AudioTrack track;
     public void play() {
         reset();
-
-        // TODO: karaoke play feature
-//        mediaPlayer.stop();
-//
-//        try {
-//            track = MusicUtil.playKaraoke(context, music.getUri());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        musicPlayer.start();
 
         app.sendUpdateNotification();
 
     }
 
     public void stop() {
-        clearMediaPlayer();
+        clearMusicPlayer();
     }
 
     public void pause() {
-        if (mediaPlayer == null) return;
-        mediaPlayer.pause();
+        if (musicPlayer == null) return;
+        musicPlayer.pause();
         pausing = true;
 
         app.sendUpdateNotification();
     }
 
     public void resume() {
-        if (mediaPlayer == null) return;
-        mediaPlayer.start();
+        if (musicPlayer == null) return;
+        musicPlayer.start();
         pausing = false;
 
         app.sendUpdateNotification();
@@ -151,7 +136,7 @@ public class MusicQueuePlayer {
     public void goNext() {
         if (this.queue == null) return;
         boolean hasNext = this.queue.goNext();
-        if (! hasNext && loop) {
+        if (! hasNext && repeating) {
             hasNext = this.queue.goFirst();
         }
         if (hasNext) updateCurrent();
@@ -167,7 +152,7 @@ public class MusicQueuePlayer {
     public void goPrev() {
         if (this.queue == null) return;
         boolean hasNext = this.queue.goPrev();
-        if (! hasNext && loop) {
+        if (! hasNext && repeating) {
             hasNext = this.queue.goLast();
         }
         if (hasNext) updateCurrent();
@@ -185,7 +170,7 @@ public class MusicQueuePlayer {
         this.queue = null;
         this.music = null;
         this.artworkFile = null;
-        clearMediaPlayer();
+        clearMusicPlayer();
 
         app.sendUpdateNotification();
     }
@@ -196,12 +181,32 @@ public class MusicQueuePlayer {
     }
 
     public boolean isPlaying() {
-        return mediaPlayer != null && mediaPlayer.isPlaying();
+        return musicPlayer != null && musicPlayer.isPlaying();
     }
 
     public boolean isBeginning() {
-        int timeMillis = mediaPlayer.getCurrentPosition();
+        int timeMillis = musicPlayer.getCurrentPosition();
         return timeMillis < 1200;
     }
+
+    public boolean isRepeating() {
+        return repeating;
+    }
+
+    public void setRepeating(boolean repeating) {
+        this.repeating = repeating;
+    }
+
+
+    public boolean isKaraoke() {
+        return karaoke;
+    }
+
+    public void setKaraoke(boolean karaoke) {
+        this.karaoke = karaoke;
+
+        // TODO: reflect to current track
+    }
+
 
 }
