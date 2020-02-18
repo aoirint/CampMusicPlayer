@@ -87,8 +87,8 @@ public class GroupActivity extends AppCompatActivity {
                     // update group?
                 }
 
-                app.musicPlayer.setQueue(group);
-                app.musicPlayer.play();
+                app.musicQueuePlayer.setQueue(group);
+                app.musicQueuePlayer.play();
             }
         });
 

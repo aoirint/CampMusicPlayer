@@ -12,13 +12,13 @@ import android.os.RemoteException;
 
 import com.github.aoirint.campmusicplayer.db.ArtworkCacheManager;
 import com.github.aoirint.campmusicplayer.db.MusicDatabase;
-import com.github.aoirint.campmusicplayer.music.MusicPlayer;
+import com.github.aoirint.campmusicplayer.music.MusicQueuePlayer;
 import com.github.aoirint.campmusicplayer.service.MediaPlayerService;
 
 public class CampMusicPlayer extends Application implements ServiceConnection {
     public MusicDatabase musicDatabase;
     public ArtworkCacheManager artworkCacheManager;
-    public MusicPlayer musicPlayer;
+    public MusicQueuePlayer musicQueuePlayer;
 
     Messenger messenger;
 
@@ -29,7 +29,7 @@ public class CampMusicPlayer extends Application implements ServiceConnection {
         final Context context = getApplicationContext();
         musicDatabase = new MusicDatabase(context);
         artworkCacheManager = new ArtworkCacheManager(context);
-        musicPlayer = new MusicPlayer(context);
+        musicQueuePlayer = new MusicQueuePlayer(context);
 
         startService();
     }
@@ -54,7 +54,7 @@ public class CampMusicPlayer extends Application implements ServiceConnection {
         unbindService(this);
         stopService(new Intent(this, MediaPlayerService.class));
 
-        musicPlayer.clearMediaPlayer();
+        musicQueuePlayer.clearMediaPlayer();
     }
 
     @Override

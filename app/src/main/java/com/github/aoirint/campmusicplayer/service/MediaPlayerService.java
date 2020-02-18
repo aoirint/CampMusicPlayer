@@ -7,9 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.media.AudioAttributes;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -17,13 +15,12 @@ import android.os.Message;
 import android.os.Messenger;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.R;
 import com.github.aoirint.campmusicplayer.activity.main.MainActivity;
 import com.github.aoirint.campmusicplayer.db.data.Music;
-import com.github.aoirint.campmusicplayer.music.MusicPlayer;
+import com.github.aoirint.campmusicplayer.music.MusicQueuePlayer;
 import com.github.aoirint.campmusicplayer.util.BitmapUtil;
 
 import java.io.IOException;
@@ -61,14 +58,14 @@ public class MediaPlayerService extends Service {
         }
 
         CampMusicPlayer app = (CampMusicPlayer) getApplication();
-        MusicPlayer musicPlayer = app.musicPlayer;
+        MusicQueuePlayer musicQueuePlayer = app.musicQueuePlayer;
 
         PendingIntent mainActivityPendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK), 0);
         PendingIntent prevPendingIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("previous"), 0);
         PendingIntent nextPendingIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("next"), 0);
         PendingIntent closePendingIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("close"), 0);
 
-        Music music = musicPlayer.getCurrentMusic();
+        Music music = musicQueuePlayer.getCurrentMusic();
         String title = "";
         String description = "";
         Bitmap artwork = null;
@@ -91,7 +88,7 @@ public class MediaPlayerService extends Service {
         Notification.Action nextAction = new Notification.Action(R.drawable.ic_skip_next_7f7f7f_32dp, "Next", nextPendingIntent);
         Notification.Action closeAction = new Notification.Action(R.drawable.ic_close_7f7f7f_32dp, "Close", closePendingIntent);
         Notification.Action playAction;
-        if (musicPlayer.isPlaying()) {
+        if (musicQueuePlayer.isPlaying()) {
             PendingIntent pauseIntent = PendingIntent.getService(this, 0, new Intent(this, MediaPlayerService.class).setAction("pause"), 0);
             playAction = new Notification.Action(R.drawable.ic_pause_7f7f7f_32dp, "Pause", pauseIntent);
         }
@@ -139,34 +136,34 @@ public class MediaPlayerService extends Service {
                 updateNotification();
                 break;
             case "play":
-                if (app.musicPlayer.isPausing()) {
-                    app.musicPlayer.resume();
+                if (app.musicQueuePlayer.isPausing()) {
+                    app.musicQueuePlayer.resume();
                 }
                 else {
-                    app.musicPlayer.play();
+                    app.musicQueuePlayer.play();
                 }
                 break;
             case "pause":
-                app.musicPlayer.pause();
+                app.musicQueuePlayer.pause();
                 break;
             case "previous":
-                if (! app.musicPlayer.isBeginning()) {
-                    if (app.musicPlayer.isPlaying()) {
-                        app.musicPlayer.play(); // reset
+                if (! app.musicQueuePlayer.isBeginning()) {
+                    if (app.musicQueuePlayer.isPlaying()) {
+                        app.musicQueuePlayer.play(); // reset
                     }
                     else {
-                        app.musicPlayer.reset();
+                        app.musicQueuePlayer.reset();
                     }
                 }
                 else {
-                    app.musicPlayer.goPrev();
+                    app.musicQueuePlayer.goPrev();
                 }
                 break;
             case "next":
-                app.musicPlayer.goNext();
+                app.musicQueuePlayer.goNext();
                 break;
             case "close":
-                app.musicPlayer.stop();
+                app.musicQueuePlayer.stop();
                 stopForeground(true);
                 stopSelf();
         }
@@ -179,7 +176,7 @@ public class MediaPlayerService extends Service {
         super.onDestroy();
 
         CampMusicPlayer app = (CampMusicPlayer) getApplicationContext();
-        app.musicPlayer.stop();
+        app.musicQueuePlayer.stop();
     }
 
     @Nullable

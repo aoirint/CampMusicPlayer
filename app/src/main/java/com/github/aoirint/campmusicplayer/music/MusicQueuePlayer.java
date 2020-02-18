@@ -10,12 +10,13 @@ import android.os.PowerManager;
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.db.data.group.Group;
-import com.github.aoirint.campmusicplayer.util.MusicUtil;
+import com.github.aoirint.campmusicplayer.music.queue.ImmutableQueuePlayer;
+import com.github.aoirint.campmusicplayer.music.queue.QueuePlayer;
 
 import java.io.File;
 import java.io.IOException;
 
-public class MusicPlayer {
+public class MusicQueuePlayer {
     Context context;
     CampMusicPlayer app;
     MediaPlayer mediaPlayer;
@@ -28,7 +29,7 @@ public class MusicPlayer {
     boolean pausing;
     boolean loop;
 
-    public MusicPlayer(Context context) {
+    public MusicQueuePlayer(Context context) {
         this.context = context;
         this.app = (CampMusicPlayer) context.getApplicationContext();
     }

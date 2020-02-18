@@ -1,4 +1,4 @@
-package com.github.aoirint.campmusicplayer.music;
+package com.github.aoirint.campmusicplayer.music.queue;
 
 import com.github.aoirint.campmusicplayer.db.data.Music;
 
