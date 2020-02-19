@@ -4,7 +4,7 @@ import static com.github.aoirint.campmusicplayer.activity.main.MainActivity.logg
 
 public class LogUtil {
 
-    public void info(Iterable iterable) {
+    public static void info(Iterable iterable) {
         StringBuilder sb = new StringBuilder();
         sb.append('[');
         for (Object obj: iterable) sb.append(obj).append(',');

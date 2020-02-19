@@ -87,6 +87,13 @@ public class MusicTagRelationTable {
         db.delete("musicTagRelation", "musicId=? AND tagId=?", new String[] { String.valueOf(music.id), String.valueOf(tag.id) });
     }
 
+    public void removeAllTags(SQLiteDatabase db, Music music) {
+        ContentValues values = new ContentValues();
+        values.put("musicId", music.id);
+
+        db.delete("musicTagRelation", "musicId=?", new String[] { String.valueOf(music.id) });
+    }
+
     public boolean hasTag(Music music, Tag tag) {
         SQLiteDatabase db = musicDatabase.getReadableDatabase();
         Cursor cur = db.rawQuery("SELECT COUNT(*) FROM musicTagRelation WHERE musicId=? AND tagId=?", new String[] { String.valueOf(music.id), String.valueOf(tag.id) });

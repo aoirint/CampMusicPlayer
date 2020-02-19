@@ -5,4 +5,5 @@
     <string name="musics">Musics</string>
     <string name="title_activity_tag">TagActivity</string>
     <string name="title_activity_group">GroupActivity</string>
+    <string name="title_activity_music_search">MusicSearchActivity</string>
 </resources>

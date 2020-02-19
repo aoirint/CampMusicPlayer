@@ -153,11 +153,10 @@ public class GroupActivity extends AppCompatActivity {
         finish();
     }
     void finishSave() {
-        setResult(RESULT_OK);
         Intent intent = new Intent();
         intent.putExtra("musics", musics.toArray(new Music[musics.size()]));
 
-        setIntent(intent);
+        setResult(RESULT_OK, intent);
         finish();
     }
 

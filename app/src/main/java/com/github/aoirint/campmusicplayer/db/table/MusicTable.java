@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import com.github.aoirint.campmusicplayer.db.MusicDatabase;
 import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.db.data.MusicKey;
@@ -19,20 +20,16 @@ public class MusicTable {
         this.musicDatabase = musicDatabase;
     }
 
+    public Music[] search(String keyword) {
+        SQLiteDatabase db = musicDatabase.getReadableDatabase();
+        Cursor cur = db.rawQuery("SELECT * FROM music WHERE title LIKE ? ORDER BY created_at DESC LIMIT 30", new String[]{ "%" + keyword + "%" });
+        return loadArrayFromCursor(cur);
+    }
 
     public Music[] listMusicsRecentlyAdded() {
         SQLiteDatabase db = musicDatabase.getReadableDatabase();
         Cursor cur = db.rawQuery("SELECT * FROM music ORDER BY created_at DESC LIMIT 10", new String[]{});
-
-        int count = cur.getCount();
-        Music[] result = new Music[count];
-
-        for (int index=0; index<count; index++) {
-            cur.moveToNext();
-            result[index] = loadFromCursor(cur);
-        }
-
-        return result;
+        return loadArrayFromCursor(cur);
     }
 
     Music loadFromCursor(Cursor cur) {
@@ -132,6 +129,27 @@ public class MusicTable {
         }
 
         return musics;
+    }
+
+    public void remove(SQLiteDatabase db, Music music) {
+        musicDatabase.musicTagRelationTable.removeAllTags(db, music);
+
+        db.delete("music", "id=?", new String[] { String.valueOf(music.id) });
+
+        CampMusicPlayer app = (CampMusicPlayer) musicDatabase.context.getApplicationContext();
+        app.artworkCacheManager.deleteArtworkCache(music);
+    }
+
+    public void removeAll(Music[] musics) {
+        SQLiteDatabase db = musicDatabase.getWritableDatabase();
+        db.beginTransaction();
+
+        for (Music music: musics) {
+            remove(db, music);
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
     }
 
     public Music loadAndRegister(MusicKey key) throws IOException {

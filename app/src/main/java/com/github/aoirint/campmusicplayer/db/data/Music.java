@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.github.aoirint.campmusicplayer.CampMusicPlayer;
 import java.io.Serializable;
@@ -76,6 +77,14 @@ public class Music implements Serializable {
     @Override
     public String toString() {
         return title;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (! (obj instanceof Music)) return false;
+        Music other = (Music) obj;
+        if (this.id != null && other.id != null) return this.id == other.id;
+        return this.uri.equals(other.uri);
     }
 
     public static Music createFromKey(Context context, MusicKey key) {

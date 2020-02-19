@@ -2,7 +2,6 @@ package com.github.aoirint.campmusicplayer.activity.tag.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 

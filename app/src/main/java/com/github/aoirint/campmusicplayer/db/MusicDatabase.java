@@ -4,11 +4,15 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.db.table.AlbumTable;
 import com.github.aoirint.campmusicplayer.db.table.ArtistTable;
 import com.github.aoirint.campmusicplayer.db.table.MusicTable;
 import com.github.aoirint.campmusicplayer.db.table.MusicTagRelationTable;
 import com.github.aoirint.campmusicplayer.db.table.TagTable;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MusicDatabase extends SQLiteOpenHelper {
     public static final String DB_PATH = "db.sqlite3";
@@ -32,6 +36,11 @@ public class MusicDatabase extends SQLiteOpenHelper {
         albumTable = new AlbumTable(this);
         artistTable = new ArtistTable(this);
     }
+
+    public List<Music> search(String keyword) {
+        return Arrays.asList(musicTable.search(keyword));
+    }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {

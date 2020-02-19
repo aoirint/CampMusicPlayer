@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 
+import com.github.aoirint.campmusicplayer.db.data.Music;
 import com.github.aoirint.campmusicplayer.util.HashUtil;
 
 import java.io.File;
@@ -47,6 +48,13 @@ public class ArtworkCacheManager {
         fis.close();
 
         return bitmap;
+    }
+
+    public void deleteArtworkCache(Music music) {
+        Uri musicUri = music.getUri();
+        File artworkFile = getArtworkCachePath(musicUri);
+
+        artworkFile.delete();
     }
 
     private Bitmap createArtworkCache(Uri musicUri) throws IOException {

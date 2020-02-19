@@ -21,6 +21,7 @@ import com.github.aoirint.campmusicplayer.R;
 import com.github.aoirint.campmusicplayer.activity.main.view.GroupArtworkEntryView;
 import com.github.aoirint.campmusicplayer.activity.main.view.MusicArtworkEntryView;
 import com.github.aoirint.campmusicplayer.activity.group.GroupActivity;
+import com.github.aoirint.campmusicplayer.activity.music.MusicSearchActivity;
 import com.github.aoirint.campmusicplayer.activity.tag.TagActivity;
 import com.github.aoirint.campmusicplayer.db.data.Album;
 import com.github.aoirint.campmusicplayer.db.data.group.GeneratedAlbumGroup;
@@ -37,9 +38,12 @@ import java.util.logging.Logger;
 public class MainActivity extends AppCompatActivity {
     public static final int ADD_MUSIC_REQUEST_CODE = 1000;
     public static final int MUSIC_TAG_REQUEST_CODE = 1001;
+    public static final int REMOVE_MUSIC_REQUEST_CODE = 1002;
     public static Logger logger = Logger.getLogger("CampMusicPlayer");
 
     CampMusicPlayer app;
+    ImageButton addButton;
+    ImageButton removeButton;
     ImageButton toggleRepeatingButton;
     ImageButton toggleKaraokeButton;
 
@@ -48,10 +52,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.addButton).setOnClickListener(new View.OnClickListener() {
+        addButton = findViewById(R.id.addButton);
+        addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openMusicFileChooser();
+            }
+        });
+
+        removeButton = findViewById(R.id.removeButton);
+        removeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMusicRemover();
             }
         });
 
@@ -205,6 +218,12 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, ADD_MUSIC_REQUEST_CODE);
     }
 
+    public void openMusicRemover() {
+        Intent intent = new Intent(getApplicationContext(), MusicSearchActivity.class);
+
+        startActivityForResult(intent, REMOVE_MUSIC_REQUEST_CODE);
+    }
+
     public void onMusicArtworkEntryClicked(MusicArtworkEntryView artworkView) {
         Intent intent = new Intent(this, TagActivity.class);
 
@@ -296,7 +315,8 @@ public class MainActivity extends AppCompatActivity {
                     addMusicAsync(audioUri);
                 }
             }
-        } else if (requestCode == MUSIC_TAG_REQUEST_CODE) {
+        }
+        else if (requestCode == MUSIC_TAG_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Music[] musics = (Music[]) data.getSerializableExtra("musics");
                 Tag[] tags = (Tag[]) data.getSerializableExtra("tags");
@@ -330,6 +350,16 @@ public class MainActivity extends AppCompatActivity {
                 updateList();
             }
         }
+        else if (requestCode == REMOVE_MUSIC_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Music[] musics = (Music[]) data.getSerializableExtra("musics");
+
+                app.musicDatabase.musicTable.removeAll(musics);
+
+                updateList();
+            }
+
+       }
 
     }
 }
