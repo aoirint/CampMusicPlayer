@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
+import static com.github.aoirint.campmusicplayer.activity.main.MainActivity.logger;
+
 // TODO: seek
 public class KaraokeMusicPlayer implements IMusicPlayer {
     Context context;
@@ -132,8 +134,11 @@ public class KaraokeMusicPlayer implements IMusicPlayer {
                             int waveLeft = (outBytes[i*4] << 8) | outBytes[i*4 + 1];
                             int waveRight = (outBytes[i*4 + 2] << 8) | outBytes[i*4 + 3];
 
-                            int sub = waveLeft - waveRight;
-                            int wave = Math.min(Math.max(waveMin, sub), waveMax);
+                            int lr = waveLeft - waveRight;
+                            int rl = waveRight - waveLeft;
+                            int sub = Math.abs(lr) < Math.abs(rl) ? lr : rl;
+//                            int wave = Math.min(Math.max(waveMin, sub), waveMax);
+                            int wave = sub;
 
                             byte[] value = ByteBuffer.allocate(2).putShort((short) wave).array();
 
@@ -153,8 +158,12 @@ public class KaraokeMusicPlayer implements IMusicPlayer {
                             int waveLeft = outBytes[i*2];
                             int waveRight = outBytes[i*2 + 1];
 
-                            int sub = waveLeft - waveRight;
-                            int wave = Math.min(Math.max(waveMin, sub), waveMax);
+                            int lr = waveLeft - waveRight;
+                            int rl = waveRight - waveLeft;
+                            int sub = Math.abs(lr) < Math.abs(rl) ? lr : rl;
+//                            int wave = Math.min(Math.max(waveMin, sub), waveMax);
+                            int wave = sub;
+
                             byte value = (byte) wave;
 
                             outBytes[i*2] = value;
@@ -168,6 +177,11 @@ public class KaraokeMusicPlayer implements IMusicPlayer {
                     decoder.releaseOutputBuffer(outputBufferIndex, false);
                 }
 
+
+                if (listener != null) listener.onCompletion(KaraokeMusicPlayer.this);
+                playing = false;
+
+                logger.info("complete!");
             }
         });
 

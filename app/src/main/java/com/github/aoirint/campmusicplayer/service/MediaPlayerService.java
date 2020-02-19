@@ -160,7 +160,7 @@ public class MediaPlayerService extends Service {
                 }
                 break;
             case "next":
-                app.musicQueuePlayer.goNext();
+                app.musicQueuePlayer.goNext(false);
                 break;
             case "close":
                 app.musicQueuePlayer.stop();

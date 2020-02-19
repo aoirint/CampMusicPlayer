@@ -62,7 +62,7 @@ public class MusicQueuePlayer {
         musicPlayer.setOnCompletionListener(new IMusicPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(IMusicPlayer musicPlayer) {
-                goNext();
+                goNext(true);
             }
         });
 
@@ -133,7 +133,7 @@ public class MusicQueuePlayer {
         app.sendUpdateNotification();
     }
 
-    public void goNext() {
+    public void goNext(boolean forcePlay) {
         if (this.queue == null) return;
         boolean hasNext = this.queue.goNext();
         if (! hasNext && repeating) {
@@ -142,7 +142,7 @@ public class MusicQueuePlayer {
         if (hasNext) updateCurrent();
         else clearQueue();
 
-        if (isPlaying()) {
+        if (isPlaying() || forcePlay) {
             play();
         }
         else {
